@@ -21,6 +21,9 @@ dependencies {
             'com.amazonaws:aws-lambda-java-core:+',
             'com.amazonaws:aws-lambda-java-events:+'
     )
+    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-dynamodb
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.9.0'
+
 }
 
 task buildZip(type: Zip) {
