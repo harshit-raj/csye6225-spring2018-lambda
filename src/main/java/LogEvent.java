@@ -55,5 +55,7 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
     this.dynamoDB = new DynamoDB(client);
   }
 
+  private 
+
 }
 
