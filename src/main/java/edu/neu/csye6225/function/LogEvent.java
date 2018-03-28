@@ -42,11 +42,11 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
 
       //////////////////////////////////////////////////////////////////////
       context.getLogger().log("initializing db");
-      this.initDynamoDB();
+//      this.initDynamoDB();
 
-      Table table = dynamoDB.getTable(tableName);
+//      Table table = dynamoDB.getTable(tableName);
 
-      Optional<Item> item = Optional.ofNullable(table.getItem("id", payload));
+//      Optional<Item> item = Optional.ofNullable(table.getItem("id", payload));
 
       long TTLepochTime = Instant.now().getEpochSecond();
       TTLepochTime += 1200;
@@ -57,7 +57,7 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
 
 
 
-      if(!(item.isPresent())){
+  /*    if(!(item.isPresent())){
           context.getLogger().log("Record not found making new");
           context.getLogger().log("Payload "+ payload+" token "+ token+" epochTime "+TTLepochTime);
 
@@ -67,14 +67,17 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
                   .withNumber("tokenTTL",TTLepochTime);
           table.putItem(saveItem);
 
+*/
 
 
+            String dn = System.getenv("domainName");
 
 
 
           try{
-              String mailText = "<p><a href = \"www.google.com\">Raju choti bacchi hai "+token+" </a></p>";
-              sendMail(payload,"do-not-reply@csye6225-spring2018-rajh.me", mailText,"Message from GOD");
+              String mailText = "<p><a href = \"www."+dn+"/reset?token="+token+"&email="+payload+"\">Click me to reset your password "+token+" </a></p>";
+              context.getLogger().log("Link is : "+ mailText);
+              sendMail(payload,"do-not-reply@"+dn, mailText,"Password reset request");
               context.getLogger().log("Mail Sent");
               context.getLogger().log("Payload "+ payload+" token "+ token+" epochTime "+TTLepochTime);
 
@@ -83,7 +86,7 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
 
           }
 
-      }
+  //    }
 
 
 
