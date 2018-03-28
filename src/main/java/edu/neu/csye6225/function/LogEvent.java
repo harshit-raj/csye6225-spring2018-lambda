@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
 import java.util.Optional;
+import java.util.Random;
 
 public class LogEvent implements RequestHandler<SNSEvent, Object> {
 
@@ -50,12 +51,19 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
       long TTLepochTime = Instant.now().getEpochSecond();
       TTLepochTime += 1200;
 
+      String token = getToken(payload, TTLepochTime);
+
+
+
+
 
       if(!(item.isPresent())){
           context.getLogger().log("Record not found making new");
+          context.getLogger().log("Payload "+ payload+" token "+ token+" epochTime "+TTLepochTime);
+
           Item saveItem = new Item()
                   .withPrimaryKey("id",payload)
-                  .withString("token","this is a token")
+                  .withString("token",token)
                   .withNumber("tokenTTL",TTLepochTime);
           table.putItem(saveItem);
 
@@ -63,22 +71,19 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
 
 
 
+
           try{
-              String mailText = "<p><a href = \"www.google.com\">Raju choti bacchi hai</a></p>";
+              String mailText = "<p><a href = \"www.google.com\">Raju choti bacchi hai "+token+" </a></p>";
               sendMail(payload,"do-not-reply@csye6225-spring2018-rajh.me", mailText,"Message from GOD");
               context.getLogger().log("Mail Sent");
+              context.getLogger().log("Payload "+ payload+" token "+ token+" epochTime "+TTLepochTime);
 
           }catch (Exception ex){
               context.getLogger().log("Error : "+ ex.toString());
 
           }
+
       }
-
-
-
-
-
-
 
 
 
@@ -89,6 +94,7 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
     context.getLogger().log("1: " + (request == null));
 
     context.getLogger().log("2: " + (request.getRecords().size()));
+
 
 
 
@@ -103,20 +109,25 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
     context.getLogger().log("Done!!!");
 
 
-    //send email
-
-
-
-
-
-
-
-
-
-
-
     return null;
   }
+
+
+  private String getToken(String email, long epTime){
+      long token = 17;
+      token *= 31;
+      token += email.hashCode();
+      token *= 31;
+      token += ((Long)epTime).hashCode();
+      Random random = new Random(epTime);
+      token *= 31;
+      token += random.nextLong();
+      String tok = Long.toHexString(token);
+      return tok;
+
+  }
+
+
 
   private void initDynamoDB(){
       AmazonDynamoDB client = AmazonDynamoDBClientBuilder
