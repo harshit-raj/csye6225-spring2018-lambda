@@ -78,10 +78,9 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
 
             String dn = System.getenv("domainName");
 
-
-
           try{
-              String mailText = "<p><a href = \"www."+dn+"/reset?token="+token+"&email="+payload+"\">Click me to reset your password</a></p>";
+              String mailText = "<center><img src=\"https://www.censornet.com/media/2777/product_icon_passwordreset.png\" style=\"width:100px;height:100px\"><h1>Password Change Request</h1></center>" +
+                      "<p>Hi,</p><p> We received a request to reset the password for the Application account associated with this e-mail address. Click the link below to reset your password using our secure server</p><p> <a href = \"www."+dn+"/reset?token="+token+"&email="+payload+"\"><button>Reset Password</button></a></p>";
 //              context.getLogger().log("Link is : "+ mailText);
               sendMail(payload,"do-not-reply@"+dn, mailText,"Password reset request");
               context.getLogger().log("Mail Sent with password reset link");
