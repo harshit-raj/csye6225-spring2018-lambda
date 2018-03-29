@@ -33,6 +33,10 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
 
   public Object handleRequest(SNSEvent request, Context context) {
 
+      String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime());
+
+      context.getLogger().log("Lambda invoked : " + timeStamp);
+
 
       String payload = request.getRecords().get(0).getSNS().getMessage();
 
@@ -42,11 +46,11 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
 
       //////////////////////////////////////////////////////////////////////
       context.getLogger().log("initializing db");
-//      this.initDynamoDB();
+      this.initDynamoDB();
 
-//      Table table = dynamoDB.getTable(tableName);
+      Table table = dynamoDB.getTable(tableName);
 
-//      Optional<Item> item = Optional.ofNullable(table.getItem("id", payload));
+      Optional<Item> item = Optional.ofNullable(table.getItem("id", payload));
 
       long TTLepochTime = Instant.now().getEpochSecond();
       TTLepochTime += 1200;
@@ -57,9 +61,9 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
 
 
 
-  /*    if(!(item.isPresent())){
-          context.getLogger().log("Record not found making new");
-          context.getLogger().log("Payload "+ payload+" token "+ token+" epochTime "+TTLepochTime);
+      if(!(item.isPresent())){
+          context.getLogger().log("Generating password reset record");
+//          context.getLogger().log("Payload "+ payload+" token "+ token+" epochTime "+TTLepochTime);
 
           Item saveItem = new Item()
                   .withPrimaryKey("id",payload)
@@ -67,7 +71,9 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
                   .withNumber("tokenTTL",TTLepochTime);
           table.putItem(saveItem);
 
-*/
+          context.getLogger().log("Password reset record saved to database");
+
+
 
 
             String dn = System.getenv("domainName");
@@ -75,41 +81,44 @@ public class LogEvent implements RequestHandler<SNSEvent, Object> {
 
 
           try{
-              String mailText = "<p><a href = \"www."+dn+"/reset?token="+token+"&email="+payload+"\">Click me to reset your password "+token+" </a></p>";
-              context.getLogger().log("Link is : "+ mailText);
+              String mailText = "<p><a href = \"www."+dn+"/reset?token="+token+"&email="+payload+"\">Click me to reset your password</a></p>";
+//              context.getLogger().log("Link is : "+ mailText);
               sendMail(payload,"do-not-reply@"+dn, mailText,"Password reset request");
-              context.getLogger().log("Mail Sent");
-              context.getLogger().log("Payload "+ payload+" token "+ token+" epochTime "+TTLepochTime);
+              context.getLogger().log("Mail Sent with password reset link");
+//              context.getLogger().log("Payload "+ payload+" token "+ token+" epochTime "+TTLepochTime);
 
           }catch (Exception ex){
               context.getLogger().log("Error : "+ ex.toString());
 
           }
 
-  //    }
+      }
+      else{
+          //context.getLogger().log("Record already exists for " + payload + "with token "+ token+ " taking no action");
+          context.getLogger().log("Record already exists for requested account, taking no action");
 
-
-
-    String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime());
-
-    context.getLogger().log("Invocation started: " + timeStamp);
-
-    context.getLogger().log("1: " + (request == null));
-
-    context.getLogger().log("2: " + (request.getRecords().size()));
+      }
 
 
 
 
-    context.getLogger().log(payload);
+
+//    context.getLogger().log("1: " + (request == null));
+
+//    context.getLogger().log("2: " + (request.getRecords().size()));
+
+
+
+
+//    context.getLogger().log(payload);
 
     timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime());
 
-    context.getLogger().log("Invocation completed: " + timeStamp);
+    context.getLogger().log("Lambda Completed: " + timeStamp);
 
     //PutItemOutcome outC = this.dynamoDB.getTable("csye6225").putItem(new PutItemSpec().withItem(new Item().withString("id",payload)));
 
-    context.getLogger().log("Done!!!");
+
 
 
     return null;
